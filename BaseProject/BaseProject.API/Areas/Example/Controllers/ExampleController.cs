@@ -13,6 +13,8 @@ namespace BaseProject.API.Areas.Example.Controllers
     using BaseProject.Common.Areas.Example.Models;
     using BaseProject.Common.Areas.Example.Services;
     using BaseProject.Common.Infrastructure.Exceptions;
+    using Microsoft.AspNetCore.Authentication.JwtBearer;
+    using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Mvc;
 
@@ -75,6 +77,7 @@ namespace BaseProject.API.Areas.Example.Controllers
         }
 
         [HttpPut]
+        [Authorize]
         public async Task<IActionResult> Update([FromBody] ExampleDto dto)
         {
             try

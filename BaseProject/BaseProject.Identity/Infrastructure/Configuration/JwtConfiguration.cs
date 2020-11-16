@@ -2,7 +2,7 @@
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
 
-namespace BaseProject.API.Infrastructure.Configuration
+namespace BaseProject.Identity.Infrastructure.Configuration
 {
     using System;
     using System.Collections.Generic;

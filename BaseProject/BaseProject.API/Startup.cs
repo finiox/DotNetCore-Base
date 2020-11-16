@@ -12,10 +12,9 @@ namespace BaseProject
     using System.Text;
     using System.Threading.Tasks;
     using BaseProject.API.Infrastructure.Configuration;
-    using BaseProject.API.Infrastructure.Database;
     using BaseProject.Common.DB;
     using BaseProject.Common.Infrastructure.Configuration;
-    using BaseProject.Common.Infrastructure.DependencyInjection;
+    using BaseProject.Identity.Infrastructure.Database;
     using FluentValidation.AspNetCore;
     using Microsoft.AspNetCore.Authentication.JwtBearer;
     using Microsoft.AspNetCore.Builder;
@@ -54,7 +53,8 @@ namespace BaseProject
             services.AddSingleton(_config);
             services.AddSingleton<AppConfiguration>(_config);
 
-            ServicesRegistration.Register(services);
+            Identity.Infrastructure.DependencyInjection.ServicesRegistration.Register(services);
+            Common.Infrastructure.DependencyInjection.ServicesRegistration.Register(services);
 
             services
                 .AddControllers()
@@ -80,17 +80,39 @@ namespace BaseProject
                 })
                 .AddJwtBearer(options =>
                 {
+                    options.IncludeErrorDetails = true;
                     options.SaveToken = true;
                     options.RequireHttpsMetadata = false;
                     options.TokenValidationParameters = new TokenValidationParameters()
                     {
                         ValidateIssuer = true,
                         ValidateAudience = true,
+                        ValidateLifetime = true,
+                        RequireExpirationTime = true,
                         ValidAudience = _config.Jwt.ValidAudience,
                         ValidIssuer = _config.Jwt.ValidIssuer,
                         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config.Jwt.Secret)),
                     };
                 });
+
+            services.Configure<IdentityOptions>(options =>
+            {
+                // Password settings
+                options.Password.RequireDigit = true;
+                options.Password.RequiredLength = 8;
+                options.Password.RequireNonAlphanumeric = false;
+                options.Password.RequireUppercase = true;
+                options.Password.RequireLowercase = false;
+                options.Password.RequiredUniqueChars = 6;
+
+                // Lockout settings
+                options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(30);
+                options.Lockout.MaxFailedAccessAttempts = 10;
+                options.Lockout.AllowedForNewUsers = true;
+
+                // User settings
+                options.User.RequireUniqueEmail = true;
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -104,12 +126,12 @@ namespace BaseProject
 
                 // Migrate Database in development only
                 MigrateDatabase(app.ApplicationServices);
+                SeedData(app.ApplicationServices).GetAwaiter().GetResult();
             }
 
             app.UseHttpsRedirection();
-
             app.UseRouting();
-
+            app.UseAuthentication();
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
@@ -124,6 +146,51 @@ namespace BaseProject
             var context = scope.ServiceProvider.GetService<BaseProjectContext>();
 
             context.Database.Migrate();
+        }
+
+        private async Task SeedData(IServiceProvider serviceProvider)
+        {
+            using var scope = serviceProvider.GetService<IServiceScopeFactory>().CreateScope();
+            var userManager = scope.ServiceProvider.GetService<UserManager<ApplicationUser>>();
+            var roleManager = scope.ServiceProvider.GetService<RoleManager<IdentityRole>>();
+
+            if (!await roleManager.Roles.AnyAsync())
+            {
+                var rolesToAdd = new List<IdentityRole>
+                    {
+                        new IdentityRole("Admin")
+                    };
+
+                foreach (var role in rolesToAdd)
+                {
+                    await roleManager.CreateAsync(role);
+                }
+            }
+
+            if (!await userManager.Users.AnyAsync())
+            {
+                var users = new List<(ApplicationUser User, string Role)>
+                    {
+                        (
+                            new ApplicationUser
+                            {
+                                UserName = "admin@finiox.com",
+                                Email = "admin@finiox.com",
+                            },
+                            "Admin"
+                        ),
+                    };
+
+                foreach (var user in users)
+                {
+                    var result = await userManager.CreateAsync(user.User, "Password12!");
+
+                    if (result.Succeeded)
+                    {
+                        await userManager.AddToRoleAsync(user.User, user.Role);
+                    }
+                }
+            }
         }
     }
 }

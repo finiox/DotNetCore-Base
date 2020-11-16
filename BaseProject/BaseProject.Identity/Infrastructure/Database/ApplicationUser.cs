@@ -2,7 +2,7 @@
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
 
-namespace BaseProject.API.Infrastructure.Database
+namespace BaseProject.Identity.Infrastructure.Database
 {
     using System;
     using System.Collections.Generic;
@@ -12,6 +12,6 @@ namespace BaseProject.API.Infrastructure.Database
 
     public class ApplicationUser : IdentityUser
     {
-        // Custom properties
+        public string ExampleColumn { get; set; }
     }
 }

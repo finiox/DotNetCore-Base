@@ -9,6 +9,7 @@ namespace BaseProject.API.Infrastructure.Configuration
     using System.Linq;
     using System.Threading.Tasks;
     using BaseProject.Common.Infrastructure.Configuration;
+    using BaseProject.Identity.Infrastructure.Configuration;
 
     public class APIConfiguration : AppConfiguration
     {

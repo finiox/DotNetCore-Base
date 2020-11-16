@@ -2,7 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore.Migrations;
 
-namespace BaseProject.API.Migrations
+namespace BaseProject.Identity.Migrations
 {
     public partial class Initial : Migration
     {

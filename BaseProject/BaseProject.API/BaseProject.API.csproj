@@ -36,6 +36,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\BaseProject.Common\BaseProject.Common.csproj" />
+    <ProjectReference Include="..\BaseProject.Identity\BaseProject.Identity.csproj" />
   </ItemGroup>
 
 </Project>
