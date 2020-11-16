@@ -22,6 +22,9 @@ namespace BaseProject.Common.Infrastructure.DependencyInjection
 
             // Repositories
             services.AddScoped<ExampleRepository>();
+
+            // Services
+            services.AddScoped<ExampleService>();
         }
     }
 }

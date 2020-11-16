@@ -10,7 +10,10 @@ namespace BaseProject.API.Areas.Example.Controllers
     using System.Threading.Tasks;
     using BaseProject.API.Areas.Example.ViewModels;
     using BaseProject.API.Shared.ViewModels;
+    using BaseProject.Common.Areas.Example.Models;
     using BaseProject.Common.Areas.Example.Services;
+    using BaseProject.Common.Infrastructure.Exceptions;
+    using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Mvc;
 
     [Route("api/[controller]/[action]")]
@@ -18,30 +21,45 @@ namespace BaseProject.API.Areas.Example.Controllers
     [ApiController]
     public class ExampleController : ControllerBase
     {
-        private readonly ExampleRepository _exampleRepository;
+        private readonly ExampleService _exampleService;
 
-        public ExampleController(ExampleRepository exampleRepository)
+        public ExampleController(ExampleService exampleService)
         {
-            _exampleRepository = exampleRepository;
+            _exampleService = exampleService;
         }
 
         [HttpGet]
         public async Task<ActionResult<GetAllViewModel>> Get()
         {
-            var items = await _exampleRepository.GetAllAsync();
-
-            return Ok(new GetAllViewModel()
+            try
             {
-                ExampleEntities = items.ToList()
-            });
+                var items = await _exampleService.GetList();
+
+                return Ok(new GetAllViewModel()
+                {
+                    ExampleEntities = items.ToList()
+                });
+            }
+            catch (Exception e)
+            {
+                // Exception we do not expect. Send stacktrace to user.
+                return StatusCode(StatusCodes.Status500InternalServerError, e);
+            }
         }
 
         [HttpGet("{id:int}")]
         public async Task<ActionResult<GetViewModel>> Get(int id)
         {
-            var item = await _exampleRepository.GetByIdAsync(id);
+            try
+            {
+                var item = await _exampleService.Get(id);
 
-            if (item == null)
+                return Ok(new GetViewModel()
+                {
+                    ExampleEntity = item
+                });
+            }
+            catch (ItemNotFoundException)
             {
                 return BadRequest(new ErrorViewModel()
                 {
@@ -49,11 +67,35 @@ namespace BaseProject.API.Areas.Example.Controllers
                     ErrorKey = "entity_not_found"
                 });
             }
-
-            return Ok(new GetViewModel()
+            catch (Exception e)
             {
-                ExampleEntity = item
-            });
+                // Exception we do not expect. Send stacktrace to user.
+                return StatusCode(StatusCodes.Status500InternalServerError, e);
+            }
+        }
+
+        [HttpPut]
+        public async Task<IActionResult> Update([FromBody] ExampleDto dto)
+        {
+            try
+            {
+                await _exampleService.Update(dto);
+
+                return Ok();
+            }
+            catch (ItemNotFoundException)
+            {
+                return BadRequest(new ErrorViewModel()
+                {
+                    Message = $"ExampleEntity with ID {dto.Id} not found",
+                    ErrorKey = "entity_not_found"
+                });
+            }
+            catch (Exception e)
+            {
+                // Exception we do not expect. Send stacktrace to user.
+                return StatusCode(StatusCodes.Status500InternalServerError, e);
+            }
         }
     }
 }

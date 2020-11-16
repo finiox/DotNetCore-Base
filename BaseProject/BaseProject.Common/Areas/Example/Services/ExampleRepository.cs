@@ -12,6 +12,7 @@ namespace BaseProject.Common.Areas.Example.Services
     using System.Threading.Tasks;
     using BaseProject.Common.Areas.Example.Models;
     using BaseProject.Common.DB;
+    using BaseProject.Common.Infrastructure.Exceptions;
     using Microsoft.EntityFrameworkCore;
 
     public class ExampleRepository
@@ -45,6 +46,20 @@ namespace BaseProject.Common.Areas.Example.Services
                 .Where(i => i.Id == id)
                 .Select(ExampleDto)
                 .FirstOrDefaultAsync();
+        }
+
+        public async Task Update(ExampleDto dto)
+        {
+            var dbItem = await _context.ExampleEntities.FirstOrDefaultAsync(i => i.Id == dto.Id);
+
+            if (dbItem == null)
+            {
+                throw new ItemNotFoundException(dto.Id);
+            }
+
+            dbItem.Label = dto.Label;
+
+            await _context.SaveChangesAsync();
         }
     }
 }
