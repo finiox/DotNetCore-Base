@@ -20,13 +20,17 @@ namespace BaseProject.Identity.Infrastructure.Authentication
     public class AuthenticationService
     {
         private readonly UserManager<ApplicationUser> _userManager;
+        private readonly SignInManager<ApplicationUser> _signInManager;
 
-        public AuthenticationService(UserManager<ApplicationUser> userManager)
+        public AuthenticationService(
+            UserManager<ApplicationUser> userManager,
+            SignInManager<ApplicationUser> signInManager)
         {
             _userManager = userManager;
+            _signInManager = signInManager;
         }
 
-        public async Task<string> Login(LoginRequestModel model, JwtConfiguration configuration)
+        public async Task<string> Login(JwtLoginRequestModel model, JwtConfiguration configuration)
         {
             var user = await _userManager.FindByNameAsync(model.UserName);
 
@@ -63,6 +67,33 @@ namespace BaseProject.Identity.Infrastructure.Authentication
                 signingCredentials: new SigningCredentials(authSigningKey, SecurityAlgorithms.HmacSha256));
 
             return new JwtSecurityTokenHandler().WriteToken(token);
+        }
+
+        public async Task Login(CMSLoginRequestModel model, string[] requiredRoles)
+        {
+            var user = await _userManager.FindByNameAsync(model.UserName);
+
+            if (user == null)
+            {
+                throw new UserNotFoundException();
+            }
+
+            var userRoles = await _userManager.GetRolesAsync(user);
+
+            foreach (var requiredRole in requiredRoles)
+            {
+                if (!userRoles.Contains(requiredRole))
+                {
+                    throw new NotInRoleException(requiredRole);
+                }
+            }
+
+            var signInResult = await _signInManager.PasswordSignInAsync(user, model.Password, model.RememberMe, lockoutOnFailure: false);
+
+            if (!signInResult.Succeeded)
+            {
+                throw new PasswordIncorrectException();
+            }
         }
     }
 }

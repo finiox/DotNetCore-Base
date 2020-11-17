@@ -1,0 +1,19 @@
+﻿@using Microsoft.AspNetCore.Identity
+@using BaseProject.Identity.Infrastructure.Database 
+@inject SignInManager<ApplicationUser> SignInManager
+@inject UserManager<ApplicationUser> UserManager
+
+<ul class="navbar-nav">
+@if (SignInManager.IsSignedIn(User))
+{
+    <li class="nav-item">
+        <a  class="nav-link text-dark" href="#" title="Manage">Hello @User.Identity.Name!</a>
+    </li>
+}
+else
+{
+    <li class="nav-item">
+        <a class="nav-link text-dark" asp-area="Account" asp-controller="Authentication" asp-action="Login">Login</a>
+    </li>
+}
+</ul>
