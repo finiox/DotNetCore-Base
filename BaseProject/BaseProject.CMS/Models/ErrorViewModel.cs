@@ -1,4 +1,6 @@
-using System;
+// <copyright file="ErrorViewModel.cs" company="PlaceholderCompany">
+// Copyright (c) PlaceholderCompany. All rights reserved.
+// </copyright>
 
 namespace BaseProject.CMS.Models
 {

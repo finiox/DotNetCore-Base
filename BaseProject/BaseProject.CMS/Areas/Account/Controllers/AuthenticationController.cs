@@ -11,6 +11,7 @@ namespace BaseProject.CMS.Areas.Account.Controllers
     using BaseProject.CMS.Areas.Account.ViewModels;
     using BaseProject.Identity.Infrastructure.Authentication;
     using BaseProject.Identity.Infrastructure.Exceptions;
+    using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
 
     [Area("Account")]
@@ -45,7 +46,7 @@ namespace BaseProject.CMS.Areas.Account.Controllers
                     },
                     new string[] { "Admin" });
 
-                return RedirectToRoute("/");
+                return Redirect("/");
             }
             catch (NotInRoleException)
             {
@@ -62,6 +63,15 @@ namespace BaseProject.CMS.Areas.Account.Controllers
                 ModelState.AddModelError("password_incorrect", "Wachtwoord onjuist");
                 return View(model);
             }
+        }
+
+        [HttpGet]
+        [Authorize]
+        public async Task<IActionResult> Logout()
+        {
+            await _authenticationService.Logout();
+
+            return RedirectToAction(nameof(Login));
         }
     }
 }

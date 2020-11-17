@@ -95,5 +95,7 @@ namespace BaseProject.Identity.Infrastructure.Authentication
                 throw new PasswordIncorrectException();
             }
         }
+
+        public async Task Logout() => await _signInManager.SignOutAsync();
     }
 }
