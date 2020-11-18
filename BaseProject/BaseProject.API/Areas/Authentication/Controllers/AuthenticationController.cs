@@ -11,8 +11,8 @@ namespace BaseProject.API.Areas.Authentication.Controllers
     using BaseProject.API.Areas.Authentication.ViewModels;
     using BaseProject.API.Infrastructure.Configuration;
     using BaseProject.API.Shared.ViewModels;
-    using BaseProject.Identity.Infrastructure.Authentication;
     using BaseProject.Identity.Infrastructure.Exceptions;
+    using BaseProject.Identity.Infrastructure.Services;
     using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Mvc;
 
@@ -21,10 +21,10 @@ namespace BaseProject.API.Areas.Authentication.Controllers
     [ApiController]
     public class AuthenticationController : ControllerBase
     {
-        private readonly AuthenticationService _authenticationService;
+        private readonly IdentityAuthenticationService _authenticationService;
         private readonly APIConfiguration _config;
 
-        public AuthenticationController(AuthenticationService authenticationService, APIConfiguration config)
+        public AuthenticationController(IdentityAuthenticationService authenticationService, APIConfiguration config)
         {
             _authenticationService = authenticationService;
             _config = config;

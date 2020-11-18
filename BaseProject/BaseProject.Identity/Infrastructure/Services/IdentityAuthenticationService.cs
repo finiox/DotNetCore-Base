@@ -1,8 +1,8 @@
-﻿// <copyright file="AuthenticationService.cs" company="PlaceholderCompany">
+﻿// <copyright file="IdentityAuthenticationService.cs" company="PlaceholderCompany">
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
 
-namespace BaseProject.Identity.Infrastructure.Authentication
+namespace BaseProject.Identity.Infrastructure.Services
 {
     using System;
     using System.Collections.Generic;
@@ -10,19 +10,19 @@ namespace BaseProject.Identity.Infrastructure.Authentication
     using System.Security.Claims;
     using System.Text;
     using System.Threading.Tasks;
-    using BaseProject.Identity.Infrastructure.Authentication.Models;
     using BaseProject.Identity.Infrastructure.Configuration;
     using BaseProject.Identity.Infrastructure.Database;
     using BaseProject.Identity.Infrastructure.Exceptions;
+    using BaseProject.Identity.Infrastructure.Services.Models;
     using Microsoft.AspNetCore.Identity;
     using Microsoft.IdentityModel.Tokens;
 
-    public class AuthenticationService
+    public class IdentityAuthenticationService
     {
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
 
-        public AuthenticationService(
+        public IdentityAuthenticationService(
             UserManager<ApplicationUser> userManager,
             SignInManager<ApplicationUser> signInManager)
         {
@@ -30,7 +30,7 @@ namespace BaseProject.Identity.Infrastructure.Authentication
             _signInManager = signInManager;
         }
 
-        public async Task<string> Login(JwtLoginRequestModel model, JwtConfiguration configuration)
+        public async Task<string> Login(JwtLoginModel model, JwtConfiguration configuration)
         {
             var user = await _userManager.FindByNameAsync(model.UserName);
 
@@ -69,7 +69,7 @@ namespace BaseProject.Identity.Infrastructure.Authentication
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
 
-        public async Task Login(CMSLoginRequestModel model, string[] requiredRoles)
+        public async Task Login(CMSLoginModel model, string[] requiredRoles)
         {
             var user = await _userManager.FindByNameAsync(model.UserName);
 

@@ -11,15 +11,17 @@ namespace BaseProject.CMS.Areas.Account.Controllers
     using BaseProject.CMS.Areas.Account.ViewModels;
     using BaseProject.Identity.Infrastructure.Exceptions;
     using BaseProject.Identity.Infrastructure.Services;
+    using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Mvc;
 
     [Area("Account")]
+    [Authorize]
     public class UserController : Controller
     {
-        private readonly UserService _userService;
+        private readonly IdentityAccountService _userService;
 
-        public UserController(UserService userService)
+        public UserController(IdentityAccountService userService)
         {
             _userService = userService;
         }

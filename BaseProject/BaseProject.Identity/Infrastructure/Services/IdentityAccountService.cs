@@ -1,4 +1,4 @@
-﻿// <copyright file="UserService.cs" company="PlaceholderCompany">
+﻿// <copyright file="IdentityAccountService.cs" company="PlaceholderCompany">
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
 
@@ -14,13 +14,13 @@ namespace BaseProject.Identity.Infrastructure.Services
     using Microsoft.AspNetCore.Identity;
     using Microsoft.EntityFrameworkCore;
 
-    public class UserService
+    public class IdentityAccountService
     {
         private readonly ApplicationDbContext _context;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly RoleManager<IdentityRole> _roleManager;
 
-        public UserService(
+        public IdentityAccountService(
             ApplicationDbContext context,
             UserManager<ApplicationUser> userManager,
             RoleManager<IdentityRole> roleManager)
@@ -76,5 +76,32 @@ namespace BaseProject.Identity.Infrastructure.Services
         public async Task DeleteAsync(ApplicationUser user) => await _userManager.DeleteAsync(user);
 
         public async Task DeleteAsync(string id) => await _userManager.DeleteAsync(await GetAsync(id));
+
+        public async Task Seed()
+        {
+            if (!await _userManager.Users.AnyAsync())
+            {
+                var users = new List<(ApplicationUser User, string Role)>
+                    {
+                        (
+                            new ApplicationUser
+                            {
+                                UserName = "admin@finiox.com",
+                                Email = "admin@finiox.com",
+                            },
+                            IdentityRoleService.AdminRole)
+                    };
+
+                foreach (var user in users)
+                {
+                    var result = await _userManager.CreateAsync(user.User, "Password12!");
+
+                    if (result.Succeeded)
+                    {
+                        await _userManager.AddToRoleAsync(user.User, user.Role);
+                    }
+                }
+            }
+        }
     }
 }

@@ -9,12 +9,16 @@ namespace BaseProject.CMS
     using System.Linq;
     using System.Threading.Tasks;
     using BaseProject.CMS.Infrastructure.Configuration;
+    using BaseProject.Common.DB;
     using BaseProject.Common.Infrastructure.Configuration;
     using BaseProject.Common.Infrastructure.DependencyInjection;
     using BaseProject.Identity.Infrastructure.Database;
     using BaseProject.Identity.Infrastructure.DependencyInjection;
+    using BaseProject.Identity.Infrastructure.Services;
+    using Microsoft.AspNetCore.Authentication.Cookies;
     using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.Hosting;
+    using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.HttpsPolicy;
     using Microsoft.AspNetCore.Identity;
     using Microsoft.EntityFrameworkCore;
@@ -41,9 +45,6 @@ namespace BaseProject.CMS
             services.AddSingleton(_config);
             services.AddSingleton<AppConfiguration>(_config);
 
-            IdentityServicesRegistration.Register(services);
-            CommonServicesRegistration.Register(services);
-
             // Entity Framework
             services
                 .AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(_config.DB.ConnectionString));
@@ -56,6 +57,9 @@ namespace BaseProject.CMS
 
             services.AddControllersWithViews();
             services.AddRazorPages();
+
+            services.AddIdentityProject();
+            services.AddCommonProject();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -64,6 +68,10 @@ namespace BaseProject.CMS
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
+
+                // Migrate Database in development only
+                MigrateDatabase(app.ApplicationServices);
+                SeedData(app.ApplicationServices).GetAwaiter().GetResult();
             }
             else
             {
@@ -89,6 +97,25 @@ namespace BaseProject.CMS
 
                 endpoints.MapRazorPages();
             });
+        }
+
+        private static void MigrateDatabase(IServiceProvider serviceProvider)
+        {
+            using var scope = serviceProvider.GetService<IServiceScopeFactory>().CreateScope();
+            var context = scope.ServiceProvider.GetService<BaseProjectContext>();
+
+            context.Database.Migrate();
+        }
+
+        private static async Task SeedData(IServiceProvider serviceProvider)
+        {
+            using var scope = serviceProvider.GetService<IServiceScopeFactory>().CreateScope();
+
+            var roleService = scope.ServiceProvider.GetService<IdentityRoleService>();
+            var accountService = scope.ServiceProvider.GetService<IdentityAccountService>();
+
+            await roleService.Seed();
+            await accountService.Seed();
         }
     }
 }

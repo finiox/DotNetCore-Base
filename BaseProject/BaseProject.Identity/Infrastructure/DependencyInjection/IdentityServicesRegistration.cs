@@ -7,18 +7,17 @@ namespace BaseProject.Identity.Infrastructure.DependencyInjection
     using System;
     using System.Collections.Generic;
     using System.Text;
-    using BaseProject.Identity.Infrastructure.Authentication;
-    using BaseProject.Identity.Infrastructure.Database;
     using BaseProject.Identity.Infrastructure.Services;
     using Microsoft.Extensions.DependencyInjection;
 
     public static class IdentityServicesRegistration
     {
-        public static void Register(IServiceCollection services)
+        public static void AddIdentityProject(this IServiceCollection services)
         {
             // Services
-            services.AddScoped<AuthenticationService>();
-            services.AddScoped<UserService>();
+            services.AddScoped<IdentityAuthenticationService>();
+            services.AddScoped<IdentityAccountService>();
+            services.AddScoped<IdentityRoleService>();
         }
     }
 }

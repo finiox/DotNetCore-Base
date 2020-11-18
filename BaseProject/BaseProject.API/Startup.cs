@@ -17,6 +17,7 @@ namespace BaseProject
     using BaseProject.Common.Infrastructure.DependencyInjection;
     using BaseProject.Identity.Infrastructure.Database;
     using BaseProject.Identity.Infrastructure.DependencyInjection;
+    using BaseProject.Identity.Infrastructure.Services;
     using FluentValidation.AspNetCore;
     using Microsoft.AspNetCore.Authentication.JwtBearer;
     using Microsoft.AspNetCore.Builder;
@@ -54,9 +55,6 @@ namespace BaseProject
             // Add config singleton
             services.AddSingleton(_config);
             services.AddSingleton<AppConfiguration>(_config);
-
-            IdentityServicesRegistration.Register(services);
-            CommonServicesRegistration.Register(services);
 
             services
                 .AddControllers()
@@ -115,6 +113,9 @@ namespace BaseProject
                 // User settings
                 options.User.RequireUniqueEmail = true;
             });
+
+            services.AddIdentityProject();
+            services.AddCommonProject();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -150,48 +151,15 @@ namespace BaseProject
             context.Database.Migrate();
         }
 
-        private async Task SeedData(IServiceProvider serviceProvider)
+        private static async Task SeedData(IServiceProvider serviceProvider)
         {
             using var scope = serviceProvider.GetService<IServiceScopeFactory>().CreateScope();
-            var userManager = scope.ServiceProvider.GetService<UserManager<ApplicationUser>>();
-            var roleManager = scope.ServiceProvider.GetService<RoleManager<IdentityRole>>();
 
-            if (!await roleManager.Roles.AnyAsync())
-            {
-                var rolesToAdd = new List<IdentityRole>
-                    {
-                        new IdentityRole("Admin")
-                    };
+            var roleService = scope.ServiceProvider.GetService<IdentityRoleService>();
+            var accountService = scope.ServiceProvider.GetService<IdentityAccountService>();
 
-                foreach (var role in rolesToAdd)
-                {
-                    await roleManager.CreateAsync(role);
-                }
-            }
-
-            if (!await userManager.Users.AnyAsync())
-            {
-                var users = new List<(ApplicationUser User, string Role)>
-                    {
-                        (
-                            new ApplicationUser
-                            {
-                                UserName = "admin@finiox.com",
-                                Email = "admin@finiox.com",
-                            },
-                            "Admin")
-                    };
-
-                foreach (var user in users)
-                {
-                    var result = await userManager.CreateAsync(user.User, "Password12!");
-
-                    if (result.Succeeded)
-                    {
-                        await userManager.AddToRoleAsync(user.User, user.Role);
-                    }
-                }
-            }
+            await roleService.Seed();
+            await accountService.Seed();
         }
     }
 }

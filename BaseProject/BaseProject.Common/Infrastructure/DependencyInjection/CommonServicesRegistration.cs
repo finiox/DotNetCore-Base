@@ -15,7 +15,7 @@ namespace BaseProject.Common.Infrastructure.DependencyInjection
 
     public static class CommonServicesRegistration
     {
-        public static void Register(IServiceCollection services)
+        public static void AddCommonProject(this IServiceCollection services)
         {
             // DB Context
             services.AddDbContext<BaseProjectContext>();

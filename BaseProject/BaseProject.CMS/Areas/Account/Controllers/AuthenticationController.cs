@@ -9,17 +9,17 @@ namespace BaseProject.CMS.Areas.Account.Controllers
     using System.Linq;
     using System.Threading.Tasks;
     using BaseProject.CMS.Areas.Account.ViewModels;
-    using BaseProject.Identity.Infrastructure.Authentication;
     using BaseProject.Identity.Infrastructure.Exceptions;
+    using BaseProject.Identity.Infrastructure.Services;
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
 
     [Area("Account")]
     public class AuthenticationController : Controller
     {
-        private readonly AuthenticationService _authenticationService;
+        private readonly IdentityAuthenticationService _authenticationService;
 
-        public AuthenticationController(AuthenticationService authenticationService)
+        public AuthenticationController(IdentityAuthenticationService authenticationService)
         {
             _authenticationService = authenticationService;
         }
