@@ -1,4 +1,4 @@
-﻿// <copyright file="ServicesRegistration.cs" company="PlaceholderCompany">
+﻿// <copyright file="CommonServicesRegistration.cs" company="PlaceholderCompany">
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
 
@@ -13,7 +13,7 @@ namespace BaseProject.Common.Infrastructure.DependencyInjection
     using BaseProject.Common.DB;
     using Microsoft.Extensions.DependencyInjection;
 
-    public static class ServicesRegistration
+    public static class CommonServicesRegistration
     {
         public static void Register(IServiceCollection services)
         {

@@ -12,6 +12,5 @@ namespace BaseProject.Identity.Infrastructure.Database
 
     public class ApplicationUser : IdentityUser
     {
-        public string ExampleColumn { get; set; }
     }
 }

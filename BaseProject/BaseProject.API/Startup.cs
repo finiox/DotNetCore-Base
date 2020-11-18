@@ -14,7 +14,9 @@ namespace BaseProject
     using BaseProject.API.Infrastructure.Configuration;
     using BaseProject.Common.DB;
     using BaseProject.Common.Infrastructure.Configuration;
+    using BaseProject.Common.Infrastructure.DependencyInjection;
     using BaseProject.Identity.Infrastructure.Database;
+    using BaseProject.Identity.Infrastructure.DependencyInjection;
     using FluentValidation.AspNetCore;
     using Microsoft.AspNetCore.Authentication.JwtBearer;
     using Microsoft.AspNetCore.Builder;
@@ -53,8 +55,8 @@ namespace BaseProject
             services.AddSingleton(_config);
             services.AddSingleton<AppConfiguration>(_config);
 
-            Identity.Infrastructure.DependencyInjection.ServicesRegistration.Register(services);
-            Common.Infrastructure.DependencyInjection.ServicesRegistration.Register(services);
+            IdentityServicesRegistration.Register(services);
+            CommonServicesRegistration.Register(services);
 
             services
                 .AddControllers()
@@ -177,8 +179,7 @@ namespace BaseProject
                                 UserName = "admin@finiox.com",
                                 Email = "admin@finiox.com",
                             },
-                            "Admin"
-                        ),
+                            "Admin")
                     };
 
                 foreach (var user in users)

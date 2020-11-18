@@ -19,7 +19,7 @@ namespace BaseProject.Identity.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128)
                 .HasAnnotation("ProductVersion", "5.0.0");
 
-            modelBuilder.Entity("BaseProject.Identity.Infrastructure.Database.ApplicationUser", b =>
+            modelBuilder.Entity("BaseProject.API.Infrastructure.Database.ApplicationUser", b =>
                 {
                     b.Property<string>("Id")
                         .HasColumnType("nvarchar(450)");
@@ -37,9 +37,6 @@ namespace BaseProject.Identity.Migrations
 
                     b.Property<bool>("EmailConfirmed")
                         .HasColumnType("bit");
-
-                    b.Property<string>("ExampleColumn")
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("LockoutEnabled")
                         .HasColumnType("bit");
@@ -229,7 +226,7 @@ namespace BaseProject.Identity.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<string>", b =>
                 {
-                    b.HasOne("BaseProject.Identity.Infrastructure.Database.ApplicationUser", null)
+                    b.HasOne("BaseProject.API.Infrastructure.Database.ApplicationUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -238,7 +235,7 @@ namespace BaseProject.Identity.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<string>", b =>
                 {
-                    b.HasOne("BaseProject.Identity.Infrastructure.Database.ApplicationUser", null)
+                    b.HasOne("BaseProject.API.Infrastructure.Database.ApplicationUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -253,7 +250,7 @@ namespace BaseProject.Identity.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("BaseProject.Identity.Infrastructure.Database.ApplicationUser", null)
+                    b.HasOne("BaseProject.API.Infrastructure.Database.ApplicationUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -262,7 +259,7 @@ namespace BaseProject.Identity.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<string>", b =>
                 {
-                    b.HasOne("BaseProject.Identity.Infrastructure.Database.ApplicationUser", null)
+                    b.HasOne("BaseProject.API.Infrastructure.Database.ApplicationUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)

@@ -50,17 +50,17 @@ namespace BaseProject.CMS.Areas.Account.Controllers
             }
             catch (NotInRoleException)
             {
-                ModelState.AddModelError("not_in_role", "Je hebt geen permissie om in te loggen");
+                ModelState.AddModelError(string.Empty, "You do not have sufficient permission.");
                 return View(model);
             }
             catch (UserNotFoundException)
             {
-                ModelState.AddModelError("user_not_found", "Gebruiker niet gevonden");
+                ModelState.AddModelError("Email", "User not found.");
                 return View(model);
             }
             catch (PasswordIncorrectException)
             {
-                ModelState.AddModelError("password_incorrect", "Wachtwoord onjuist");
+                ModelState.AddModelError("Password", "Password is incorrect.");
                 return View(model);
             }
         }

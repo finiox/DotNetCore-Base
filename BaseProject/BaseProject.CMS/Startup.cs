@@ -10,7 +10,9 @@ namespace BaseProject.CMS
     using System.Threading.Tasks;
     using BaseProject.CMS.Infrastructure.Configuration;
     using BaseProject.Common.Infrastructure.Configuration;
+    using BaseProject.Common.Infrastructure.DependencyInjection;
     using BaseProject.Identity.Infrastructure.Database;
+    using BaseProject.Identity.Infrastructure.DependencyInjection;
     using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.Hosting;
     using Microsoft.AspNetCore.HttpsPolicy;
@@ -39,8 +41,8 @@ namespace BaseProject.CMS
             services.AddSingleton(_config);
             services.AddSingleton<AppConfiguration>(_config);
 
-            Identity.Infrastructure.DependencyInjection.ServicesRegistration.Register(services);
-            Common.Infrastructure.DependencyInjection.ServicesRegistration.Register(services);
+            IdentityServicesRegistration.Register(services);
+            CommonServicesRegistration.Register(services);
 
             // Entity Framework
             services
