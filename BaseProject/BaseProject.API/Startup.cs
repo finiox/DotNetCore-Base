@@ -16,10 +16,10 @@ namespace BaseProject
     using BaseProject.Common.DB;
     using BaseProject.Common.Infrastructure.Configuration;
     using BaseProject.Common.Infrastructure.DependencyInjection;
+    using BaseProject.Identity.Infrastructure.Configuration;
     using BaseProject.Identity.Infrastructure.Database;
     using BaseProject.Identity.Infrastructure.DependencyInjection;
     using BaseProject.Identity.Infrastructure.Services;
-    using FluentValidation.AspNetCore;
     using Microsoft.AspNetCore.Authentication.JwtBearer;
     using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.Hosting;
@@ -37,11 +37,13 @@ namespace BaseProject
     public class Startup
     {
         private readonly APIConfiguration _config;
+        private readonly IdentityConfiguration _identityConfig;
 
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
             _config = configuration.Get<APIConfiguration>();
+            _identityConfig = configuration.Get<IdentityConfiguration>();
         }
 
         public IConfiguration Configuration { get; }
@@ -56,24 +58,38 @@ namespace BaseProject
             // Add config singleton
             services.AddSingleton(_config);
             services.AddSingleton<AppConfiguration>(_config);
+            services.AddSingleton(_identityConfig);
 
             services
                 .AddControllers()
                 .ConfigureApiBehaviorOptions(options =>
                 {
                     options.InvalidModelStateResponseFactory = actionContext => ModelStateFactory.InvalidResponse(actionContext);
-                })
-                .AddFluentValidation();
+                });
 
-            // Entity Framework
-            services
-                .AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(_config.DB.ConnectionString));
+            // Identity project setup
+            services.AddIdentityProject(
+                dbOptions => dbOptions.UseSqlServer(_config.DB.ConnectionString),
+                identityOptions =>
+                {
+                    // Password settings
+                    identityOptions.Password.RequireDigit = true;
+                    identityOptions.Password.RequiredLength = 8;
+                    identityOptions.Password.RequireNonAlphanumeric = false;
+                    identityOptions.Password.RequireUppercase = true;
+                    identityOptions.Password.RequireLowercase = false;
+                    identityOptions.Password.RequiredUniqueChars = 6;
 
-            // Identity
-            services
-                .AddIdentity<ApplicationUser, IdentityRole>()
-                .AddEntityFrameworkStores<ApplicationDbContext>()
-                .AddDefaultTokenProviders();
+                    // Lockout settings
+                    identityOptions.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(30);
+                    identityOptions.Lockout.MaxFailedAccessAttempts = 10;
+                    identityOptions.Lockout.AllowedForNewUsers = true;
+
+                    // User settings
+                    identityOptions.User.RequireUniqueEmail = true;
+                });
+
+            services.AddCommonProject();
 
             // Authentication
             services
@@ -94,33 +110,11 @@ namespace BaseProject
                         ValidateAudience = true,
                         ValidateLifetime = true,
                         RequireExpirationTime = true,
-                        ValidAudience = _config.Jwt.ValidAudience,
-                        ValidIssuer = _config.Jwt.ValidIssuer,
-                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config.Jwt.Secret)),
+                        ValidAudience = _identityConfig.Jwt.ValidAudience,
+                        ValidIssuer = _identityConfig.Jwt.ValidIssuer,
+                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_identityConfig.Jwt.Secret)),
                     };
                 });
-
-            services.Configure<IdentityOptions>(options =>
-            {
-                // Password settings
-                options.Password.RequireDigit = true;
-                options.Password.RequiredLength = 8;
-                options.Password.RequireNonAlphanumeric = false;
-                options.Password.RequireUppercase = true;
-                options.Password.RequireLowercase = false;
-                options.Password.RequiredUniqueChars = 6;
-
-                // Lockout settings
-                options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(30);
-                options.Lockout.MaxFailedAccessAttempts = 10;
-                options.Lockout.AllowedForNewUsers = true;
-
-                // User settings
-                options.User.RequireUniqueEmail = true;
-            });
-
-            services.AddIdentityProject();
-            services.AddCommonProject();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

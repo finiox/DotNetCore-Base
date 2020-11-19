@@ -1,4 +1,4 @@
-﻿// <copyright file="ModelStateDictionaryExtensions.cs" company="PlaceholderCompany">
+﻿// <copyright file="ModelStateFactory.cs" company="PlaceholderCompany">
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
 

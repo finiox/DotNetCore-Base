@@ -9,11 +9,9 @@ namespace BaseProject.API.Areas.Authentication.Controllers
     using System.Linq;
     using System.Threading.Tasks;
     using BaseProject.API.Areas.Authentication.ViewModels;
-    using BaseProject.API.Infrastructure.Configuration;
     using BaseProject.API.Shared.ViewModels;
     using BaseProject.Identity.Infrastructure.Exceptions;
     using BaseProject.Identity.Infrastructure.Services;
-    using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Mvc;
 
     [Route("api/[controller]/[action]")]
@@ -22,12 +20,10 @@ namespace BaseProject.API.Areas.Authentication.Controllers
     public class AuthenticationController : ControllerBase
     {
         private readonly IdentityAuthenticationService _authenticationService;
-        private readonly APIConfiguration _config;
 
-        public AuthenticationController(IdentityAuthenticationService authenticationService, APIConfiguration config)
+        public AuthenticationController(IdentityAuthenticationService authenticationService)
         {
             _authenticationService = authenticationService;
-            _config = config;
         }
 
         [HttpPost]
@@ -40,8 +36,7 @@ namespace BaseProject.API.Areas.Authentication.Controllers
                     {
                         UserName = model.Email,
                         Password = model.Password
-                    },
-                    _config.Jwt);
+                    });
 
                 return Ok(token);
             }
@@ -59,9 +54,20 @@ namespace BaseProject.API.Areas.Authentication.Controllers
                     ErrorKey = "password_incorrect"
                 });
             }
-            catch (Exception e)
+            catch (UserLockedOutException)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, e);
+                return BadRequest(new ErrorViewModel()
+                {
+                    ErrorKey = "user_locked_out"
+                });
+            }
+            catch (Exception)
+            {
+                return StatusCode(500, new ErrorViewModel()
+                {
+                    Message = "Unhandled exception was thrown.",
+                    ErrorKey = "error"
+                });
             }
         }
     }

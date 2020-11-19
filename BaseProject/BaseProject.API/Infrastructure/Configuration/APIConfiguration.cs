@@ -13,6 +13,5 @@ namespace BaseProject.API.Infrastructure.Configuration
 
     public class APIConfiguration : AppConfiguration
     {
-        public JwtConfiguration Jwt { get; set; }
     }
 }

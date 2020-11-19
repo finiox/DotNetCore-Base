@@ -19,24 +19,32 @@ namespace BaseProject.Identity.Infrastructure.Services
 
     public class IdentityAuthenticationService
     {
+        private readonly IdentityConfiguration _config;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
 
         public IdentityAuthenticationService(
+            IdentityConfiguration config,
             UserManager<ApplicationUser> userManager,
             SignInManager<ApplicationUser> signInManager)
         {
+            _config = config;
             _userManager = userManager;
             _signInManager = signInManager;
         }
 
-        public async Task<string> Login(JwtLoginModel model, JwtConfiguration configuration)
+        public async Task<string> Login(JwtLoginModel model)
         {
             var user = await _userManager.FindByNameAsync(model.UserName);
 
             if (user == null)
             {
                 throw new UserNotFoundException();
+            }
+
+            if (user.LockoutEnabled && user.LockoutEnd > DateTime.Now)
+            {
+                throw new UserLockedOutException();
             }
 
             if (!await _userManager.CheckPasswordAsync(user, model.Password))
@@ -57,11 +65,11 @@ namespace BaseProject.Identity.Infrastructure.Services
                 authClaims.Add(new Claim(ClaimTypes.Role, userRole));
             }
 
-            var authSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration.Secret));
+            var authSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config.Jwt.Secret));
 
             var token = new JwtSecurityToken(
-                issuer: configuration.ValidIssuer,
-                audience: configuration.ValidAudience,
+                issuer: _config.Jwt.ValidIssuer,
+                audience: _config.Jwt.ValidAudience,
                 expires: DateTime.Now.AddYears(3),
                 claims: authClaims,
                 signingCredentials: new SigningCredentials(authSigningKey, SecurityAlgorithms.HmacSha256));
@@ -76,6 +84,11 @@ namespace BaseProject.Identity.Infrastructure.Services
             if (user == null)
             {
                 throw new UserNotFoundException();
+            }
+
+            if (user.LockoutEnabled && user.LockoutEnd > DateTime.Now)
+            {
+                throw new UserLockedOutException();
             }
 
             var userRoles = await _userManager.GetRolesAsync(user);

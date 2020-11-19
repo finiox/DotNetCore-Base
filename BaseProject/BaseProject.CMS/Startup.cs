@@ -12,6 +12,7 @@ namespace BaseProject.CMS
     using BaseProject.Common.DB;
     using BaseProject.Common.Infrastructure.Configuration;
     using BaseProject.Common.Infrastructure.DependencyInjection;
+    using BaseProject.Identity.Infrastructure.Configuration;
     using BaseProject.Identity.Infrastructure.Database;
     using BaseProject.Identity.Infrastructure.DependencyInjection;
     using BaseProject.Identity.Infrastructure.Services;
@@ -29,11 +30,13 @@ namespace BaseProject.CMS
     public class Startup
     {
         private readonly CMSConfiguration _config;
+        private readonly IdentityConfiguration _identityConfig;
 
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
             _config = configuration.Get<CMSConfiguration>();
+            _identityConfig = configuration.Get<IdentityConfiguration>();
         }
 
         public IConfiguration Configuration { get; }
@@ -44,21 +47,20 @@ namespace BaseProject.CMS
             // Add config singleton
             services.AddSingleton(_config);
             services.AddSingleton<AppConfiguration>(_config);
+            services.AddSingleton(_identityConfig);
 
-            // Entity Framework
-            services
-                .AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(_config.DB.ConnectionString));
-
-            // Identity
-            services
-                .AddIdentity<ApplicationUser, IdentityRole>()
-                .AddEntityFrameworkStores<ApplicationDbContext>()
-                .AddDefaultTokenProviders();
+            // Identity project setup
+            services.AddIdentityProject(
+                dbOptions => dbOptions.UseSqlServer(_config.DB.ConnectionString),
+                identityOptions =>
+                {
+                    // User Settings
+                    identityOptions.User.RequireUniqueEmail = true;
+                });
 
             services.AddControllersWithViews();
             services.AddRazorPages();
 
-            services.AddIdentityProject();
             services.AddCommonProject();
         }
 

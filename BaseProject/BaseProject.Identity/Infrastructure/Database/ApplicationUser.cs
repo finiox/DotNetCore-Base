@@ -12,5 +12,10 @@ namespace BaseProject.Identity.Infrastructure.Database
 
     public class ApplicationUser : IdentityUser
     {
+        public string PinCode { get; set; }
+
+        public int PinCodeAttempts { get; set; }
+
+        public DateTime? PinCodeGeneration { get; set; }
     }
 }

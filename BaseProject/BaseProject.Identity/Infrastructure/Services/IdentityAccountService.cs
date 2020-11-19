@@ -6,8 +6,10 @@ namespace BaseProject.Identity.Infrastructure.Services
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
     using System.Text;
     using System.Threading.Tasks;
+    using BaseProject.Identity.Infrastructure.Configuration;
     using BaseProject.Identity.Infrastructure.Database;
     using BaseProject.Identity.Infrastructure.Exceptions;
     using BaseProject.Identity.Infrastructure.Services.Models;
@@ -16,15 +18,18 @@ namespace BaseProject.Identity.Infrastructure.Services
 
     public class IdentityAccountService
     {
+        private readonly IdentityConfiguration _config;
         private readonly ApplicationDbContext _context;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly RoleManager<IdentityRole> _roleManager;
 
         public IdentityAccountService(
+            IdentityConfiguration config,
             ApplicationDbContext context,
             UserManager<ApplicationUser> userManager,
             RoleManager<IdentityRole> roleManager)
         {
+            _config = config;
             _context = context;
             _userManager = userManager;
             _roleManager = roleManager;
@@ -32,6 +37,14 @@ namespace BaseProject.Identity.Infrastructure.Services
 
         public async Task<ApplicationUser> CreateAsync(CreateUserModel model)
         {
+            static string PinCodeGenerator(int length)
+            {
+                const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+                var random = new Random();
+                return new string(Enumerable.Repeat(chars, length)
+                  .Select(s => s[random.Next(s.Length)]).ToArray());
+            }
+
             if (await ExistsAsync(model.UserName))
             {
                 throw new UserAlreadyExistsException();
@@ -41,7 +54,10 @@ namespace BaseProject.Identity.Infrastructure.Services
             {
                 UserName = model.UserName,
                 Email = model.Email,
-                PhoneNumber = model.PhoneNumber
+                PhoneNumber = model.PhoneNumber,
+                PinCode = PinCodeGenerator(_config.Account.PinCodeLength),
+                PinCodeAttempts = 0,
+                PinCodeGeneration = DateTime.Now
             };
 
             var result = await _userManager.CreateAsync(user, model.Password);
@@ -61,6 +77,53 @@ namespace BaseProject.Identity.Infrastructure.Services
                     }
                 }
             }
+
+            return user;
+        }
+
+        public async Task<ApplicationUser> ConfirmEmail(ConfirmEmailModel model)
+        {
+            var user = await _userManager.FindByEmailAsync(model.Email);
+
+            if (user == null)
+            {
+                throw new UserNotFoundException();
+            }
+
+            if (user.LockoutEnabled && user.LockoutEnd > DateTime.Now)
+            {
+                throw new UserLockedOutException();
+            }
+
+            if (string.IsNullOrEmpty(user.PinCode) || user.EmailConfirmed)
+            {
+                throw new PinCodeAlreadyConfirmedException();
+            }
+
+            if (string.Equals(user.PinCode, model.Pin, StringComparison.OrdinalIgnoreCase))
+            {
+                user.EmailConfirmed = true;
+                user.PinCode = string.Empty;
+                user.PinCodeAttempts = 0;
+                user.PinCodeGeneration = null;
+            }
+            else
+            {
+                user.PinCodeAttempts++;
+
+                if (user.PinCodeAttempts > _config.Account.PinCodeRetries)
+                {
+                    // Only lockout users who should be locked out
+                    if (user.LockoutEnabled)
+                    {
+                        user.LockoutEnd = DateTime.Now.AddHours(_config.Account.LockoutTimeInHours);
+                    }
+
+                    user.PinCodeAttempts = 0;
+                }
+            }
+
+            await UpdateAsync(user);
 
             return user;
         }
@@ -92,13 +155,13 @@ namespace BaseProject.Identity.Infrastructure.Services
                             IdentityRoleService.AdminRole)
                     };
 
-                foreach (var user in users)
+                foreach (var (user, role) in users)
                 {
-                    var result = await _userManager.CreateAsync(user.User, "Password12!");
+                    var result = await _userManager.CreateAsync(user, "Password12!");
 
                     if (result.Succeeded)
                     {
-                        await _userManager.AddToRoleAsync(user.User, user.Role);
+                        await _userManager.AddToRoleAsync(user, role);
                     }
                 }
             }
