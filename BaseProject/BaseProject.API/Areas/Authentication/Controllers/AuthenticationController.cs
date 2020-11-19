@@ -33,11 +33,6 @@ namespace BaseProject.API.Areas.Authentication.Controllers
         [HttpPost]
         public async Task<IActionResult> Login([FromBody] LoginViewModel model)
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState.Values);
-            }
-
             try
             {
                 string token = await _authenticationService.Login(

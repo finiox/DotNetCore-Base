@@ -12,6 +12,7 @@ namespace BaseProject
     using System.Text;
     using System.Threading.Tasks;
     using BaseProject.API.Infrastructure.Configuration;
+    using BaseProject.API.Infrastructure.Factories;
     using BaseProject.Common.DB;
     using BaseProject.Common.Infrastructure.Configuration;
     using BaseProject.Common.Infrastructure.DependencyInjection;
@@ -58,6 +59,10 @@ namespace BaseProject
 
             services
                 .AddControllers()
+                .ConfigureApiBehaviorOptions(options =>
+                {
+                    options.InvalidModelStateResponseFactory = actionContext => ModelStateFactory.InvalidResponse(actionContext);
+                })
                 .AddFluentValidation();
 
             // Entity Framework
