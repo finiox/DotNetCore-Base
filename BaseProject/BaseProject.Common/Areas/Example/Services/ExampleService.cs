@@ -14,6 +14,8 @@ namespace BaseProject.Common.Areas.Example.Services
 
     public class ExampleService
     {
+        public const int PAGESIZE = 10;
+
         private readonly ExampleRepository _exampleRepository;
 
         public ExampleService(ExampleRepository exampleRepository)
@@ -21,14 +23,14 @@ namespace BaseProject.Common.Areas.Example.Services
             _exampleRepository = exampleRepository;
         }
 
-        public async Task<IEnumerable<ExampleDto>> GetList()
+        public async Task<IEnumerable<ExampleSummary>> GetList(int page)
         {
-            return await _exampleRepository.GetAllAsync();
+            return await _exampleRepository.GetSummaryListAsync(page, PAGESIZE);
         }
 
-        public async Task<ExampleDto> Get(int id)
+        public async Task<ExampleSummary> Get(int id)
         {
-            var item = await _exampleRepository.GetByIdAsync(id);
+            var item = await _exampleRepository.GetSummaryAsync(id);
 
             if (item == null)
             {
@@ -38,7 +40,7 @@ namespace BaseProject.Common.Areas.Example.Services
             return item;
         }
 
-        public async Task Update(ExampleDto dto)
+        public async Task Update(ExampleSummary dto)
         {
             await _exampleRepository.Update(dto);
         }

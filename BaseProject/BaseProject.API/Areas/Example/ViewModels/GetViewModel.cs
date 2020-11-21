@@ -12,6 +12,6 @@ namespace BaseProject.API.Areas.Example.ViewModels
 
     public class GetViewModel
     {
-        public ExampleDto ExampleEntity { get; set; }
+        public ExampleSummary ExampleEntity { get; set; }
     }
 }

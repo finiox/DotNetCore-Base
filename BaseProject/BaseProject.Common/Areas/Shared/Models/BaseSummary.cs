@@ -1,8 +1,8 @@
-﻿// <copyright file="ExampleDto.cs" company="PlaceholderCompany">
+﻿// <copyright file="BaseSummary.cs" company="PlaceholderCompany">
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
 
-namespace BaseProject.Common.Areas.Example.Models
+namespace BaseProject.Common.Areas.Shared.Models
 {
     using System;
     using System.Collections.Generic;
@@ -10,12 +10,8 @@ namespace BaseProject.Common.Areas.Example.Models
     using System.Text;
     using System.Threading.Tasks;
 
-    public class ExampleDto
+    public class BaseSummary
     {
         public int Id { get; set; }
-
-        public string Label { get; set; }
-
-        public string LabelUppercase => this.Label.ToUpper();
     }
 }

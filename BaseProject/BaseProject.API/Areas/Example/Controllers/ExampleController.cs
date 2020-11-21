@@ -6,6 +6,7 @@ namespace BaseProject.API.Areas.Example.Controllers
 {
     using System;
     using System.Collections.Generic;
+    using System.ComponentModel.DataAnnotations;
     using System.Linq;
     using System.Threading.Tasks;
     using BaseProject.API.Areas.Example.ViewModels;
@@ -30,12 +31,12 @@ namespace BaseProject.API.Areas.Example.Controllers
             _exampleService = exampleService;
         }
 
-        [HttpGet]
-        public async Task<ActionResult<GetAllViewModel>> Get()
+        [HttpGet("{page:int?}")]
+        public async Task<ActionResult<GetAllViewModel>> List([Range(1, int.MaxValue)] int page = 1)
         {
             try
             {
-                var items = await _exampleService.GetList();
+                var items = await _exampleService.GetList(page);
 
                 return Ok(new GetAllViewModel()
                 {
@@ -78,7 +79,7 @@ namespace BaseProject.API.Areas.Example.Controllers
 
         [HttpPut]
         [Authorize]
-        public async Task<IActionResult> Update([FromBody] ExampleDto dto)
+        public async Task<IActionResult> Update([FromBody] ExampleSummary dto)
         {
             try
             {

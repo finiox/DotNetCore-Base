@@ -1,4 +1,4 @@
-﻿// <copyright file="ExampleEntity.cs" company="PlaceholderCompany">
+﻿// <copyright file="BaseEntity.cs" company="PlaceholderCompany">
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
 
@@ -10,8 +10,8 @@ namespace BaseProject.Common.Model
     using System.Text;
     using System.Threading.Tasks;
 
-    public class ExampleEntity : BaseEntity
+    public class BaseEntity
     {
-        public string Label { get; set; }
+        public int Id { get; set; }
     }
 }

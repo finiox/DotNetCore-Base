@@ -11,55 +11,37 @@ namespace BaseProject.Common.Areas.Example.Services
     using System.Text;
     using System.Threading.Tasks;
     using BaseProject.Common.Areas.Example.Models;
+    using BaseProject.Common.Areas.Shared.Abstract;
     using BaseProject.Common.DB;
     using BaseProject.Common.Infrastructure.Exceptions;
-    using Microsoft.EntityFrameworkCore;
+    using BaseProject.Common.Model;
 
-    public class ExampleRepository
+    public class ExampleRepository : BaseSummaryRepository<ExampleSummary, ExampleEntity>
     {
-        private readonly BaseProjectContext _context;
-
         public ExampleRepository(BaseProjectContext context)
+            : base(context)
         {
-            _context = context;
         }
 
-        public static Expression<Func<Model.ExampleEntity, ExampleDto>> ExampleDto =>
-            entity => new ExampleDto()
+        protected override Expression<Func<ExampleEntity, ExampleSummary>> Summary =>
+            entity => new ExampleSummary()
             {
                 Id = entity.Id,
                 Label = entity.Label
             };
 
-        public async Task<IEnumerable<ExampleDto>> GetAllAsync()
+        public async Task Update(ExampleSummary summary)
         {
-            return await _context
-                .ExampleEntities
-                .Select(ExampleDto)
-                .ToListAsync();
-        }
+            var item = await GetFromSummaryAsync(summary);
 
-        public async Task<ExampleDto> GetByIdAsync(int id)
-        {
-            return await _context
-                .ExampleEntities
-                .Where(i => i.Id == id)
-                .Select(ExampleDto)
-                .FirstOrDefaultAsync();
-        }
-
-        public async Task Update(ExampleDto dto)
-        {
-            var dbItem = await _context.ExampleEntities.FirstOrDefaultAsync(i => i.Id == dto.Id);
-
-            if (dbItem == null)
+            if (item == null)
             {
-                throw new ItemNotFoundException(dto.Id);
+                throw new ItemNotFoundException(summary.Id);
             }
 
-            dbItem.Label = dto.Label;
+            item.Label = summary.Label;
 
-            await _context.SaveChangesAsync();
+            await Update(item);
         }
     }
 }
