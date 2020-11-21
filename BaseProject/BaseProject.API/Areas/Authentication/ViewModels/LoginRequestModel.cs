@@ -1,4 +1,4 @@
-﻿// <copyright file="ConfirmEmailViewModel.cs" company="PlaceholderCompany">
+﻿// <copyright file="LoginRequestModel.cs" company="PlaceholderCompany">
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
 
@@ -10,13 +10,13 @@ namespace BaseProject.API.Areas.Authentication.ViewModels
     using System.Linq;
     using System.Threading.Tasks;
 
-    public class ConfirmEmailViewModel
+    public class LoginRequestModel
     {
         [Required]
         [EmailAddress]
         public string Email { get; set; }
 
         [Required]
-        public string Pin { get; set; }
+        public string Password { get; set; }
     }
 }

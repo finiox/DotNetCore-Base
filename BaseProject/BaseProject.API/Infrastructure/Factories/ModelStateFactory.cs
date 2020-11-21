@@ -9,6 +9,7 @@ namespace BaseProject.API.Infrastructure.Factories
     using System.Linq;
     using System.Text.RegularExpressions;
     using System.Threading.Tasks;
+    using BaseProject.API.Shared.ViewModels;
     using Microsoft.AspNetCore.Mvc;
 
     public static class ModelStateFactory
@@ -23,28 +24,13 @@ namespace BaseProject.API.Infrastructure.Factories
                         .Select(i => FormatErrorMessage(i.ErrorMessage))
                         .ToArray());
 
-            return new BadRequestObjectResult(
-                new ErrorModel()
-                {
-                    Errors = errors
-                });
+            return new BadRequestObjectResult(ErrorViewModel.MODEL_INVALID.Errors = errors);
         }
 
-        private static string FormatErrorMessage(string errorMessage)
-        {
-            var regex = new Regex("[_]{2,}", RegexOptions.None);
-            return regex.Replace(
-                errorMessage
-                    .ToLower()
-                    .TrimEnd('.')
-                    .Trim()
-                    .Replace(' ', '_'),
-                "_");
-        }
-
-        public struct ErrorModel
-        {
-            public Dictionary<string, string[]> Errors { get; set; }
-        }
+        private static string FormatErrorMessage(string errorMessage) =>
+            errorMessage
+                .ToLower()
+                .TrimEnd('.')
+                .Trim();
     }
 }

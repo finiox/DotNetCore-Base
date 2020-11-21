@@ -27,25 +27,26 @@ namespace BaseProject.API.Areas.Authentication.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Login([FromBody] LoginViewModel model)
+        public async Task<ActionResult<LoginResponseModel>> Login([FromBody] LoginRequestModel model)
         {
             try
             {
-                string token = await _authenticationService.Login(
-                    new ()
+                var (token, expirationDate) = await _authenticationService
+                    .Login(new ()
                     {
                         UserName = model.Email,
                         Password = model.Password
                     });
 
-                return Ok(token);
+                return Ok(new LoginResponseModel()
+                {
+                    Token = token,
+                    ExpirationDate = expirationDate
+                });
             }
             catch (UserNotFoundException)
             {
-                return BadRequest(new ErrorViewModel()
-                {
-                    ErrorKey = "username_not_found"
-                });
+                return BadRequest(ErrorViewModel.NOT_FOUND);
             }
             catch (PasswordIncorrectException)
             {
@@ -63,11 +64,7 @@ namespace BaseProject.API.Areas.Authentication.Controllers
             }
             catch (Exception)
             {
-                return StatusCode(500, new ErrorViewModel()
-                {
-                    Message = "Unhandled exception was thrown.",
-                    ErrorKey = "error"
-                });
+                return StatusCode(500, ErrorViewModel.UNHANDLED_EXCEPTION);
             }
         }
     }

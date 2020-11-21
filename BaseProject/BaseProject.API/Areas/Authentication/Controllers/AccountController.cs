@@ -27,7 +27,7 @@ namespace BaseProject.API.Areas.Authentication.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Register([FromBody] RegisterViewModel model)
+        public async Task<IActionResult> Register([FromBody] RegisterRequestModel model)
         {
             try
             {
@@ -58,16 +58,12 @@ namespace BaseProject.API.Areas.Authentication.Controllers
             }
             catch (Exception)
             {
-                return StatusCode(500, new ErrorViewModel()
-                {
-                    Message = "Unhandled exception was thrown.",
-                    ErrorKey = "error"
-                });
+                return StatusCode(500, ErrorViewModel.UNHANDLED_EXCEPTION);
             }
         }
 
         [HttpPost]
-        public async Task<IActionResult> ConfirmEmail(ConfirmEmailViewModel model)
+        public async Task<IActionResult> ConfirmEmail(ConfirmEmailRequestModel model)
         {
             try
             {
@@ -103,11 +99,7 @@ namespace BaseProject.API.Areas.Authentication.Controllers
             }
             catch (Exception)
             {
-                return StatusCode(500, new ErrorViewModel()
-                {
-                    Message = "Unhandled exception was thrown.",
-                    ErrorKey = "error"
-                });
+                return StatusCode(500, ErrorViewModel.UNHANDLED_EXCEPTION);
             }
         }
     }

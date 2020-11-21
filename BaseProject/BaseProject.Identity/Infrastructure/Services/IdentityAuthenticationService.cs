@@ -33,7 +33,7 @@ namespace BaseProject.Identity.Infrastructure.Services
             _signInManager = signInManager;
         }
 
-        public async Task<string> Login(JwtLoginModel model)
+        public async Task<(string, DateTime)> Login(JwtLoginModel model)
         {
             var user = await _userManager.FindByNameAsync(model.UserName);
 
@@ -67,14 +67,18 @@ namespace BaseProject.Identity.Infrastructure.Services
 
             var authSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config.Jwt.Secret));
 
-            var token = new JwtSecurityToken(
+            var expirationDate = DateTime.Now.AddMonths(1);
+
+            var jwtSecurityToken = new JwtSecurityToken(
                 issuer: _config.Jwt.ValidIssuer,
                 audience: _config.Jwt.ValidAudience,
-                expires: DateTime.Now.AddYears(3),
+                expires: expirationDate,
                 claims: authClaims,
                 signingCredentials: new SigningCredentials(authSigningKey, SecurityAlgorithms.HmacSha256));
 
-            return new JwtSecurityTokenHandler().WriteToken(token);
+            string token = new JwtSecurityTokenHandler().WriteToken(jwtSecurityToken);
+
+            return (token, expirationDate);
         }
 
         public async Task Login(CMSLoginModel model, string[] requiredRoles)

@@ -43,10 +43,9 @@ namespace BaseProject.API.Areas.Example.Controllers
                     ExampleEntities = items.ToList()
                 });
             }
-            catch (Exception e)
+            catch (Exception)
             {
-                // Exception we do not expect. Send stacktrace to user.
-                return StatusCode(StatusCodes.Status500InternalServerError, e);
+                return StatusCode(500, ErrorViewModel.UNHANDLED_EXCEPTION);
             }
         }
 
@@ -64,16 +63,11 @@ namespace BaseProject.API.Areas.Example.Controllers
             }
             catch (ItemNotFoundException)
             {
-                return BadRequest(new ErrorViewModel()
-                {
-                    Message = $"ExampleEntity with ID {id} not found",
-                    ErrorKey = "entity_not_found"
-                });
+                return BadRequest(ErrorViewModel.NOT_FOUND);
             }
-            catch (Exception e)
+            catch (Exception)
             {
-                // Exception we do not expect. Send stacktrace to user.
-                return StatusCode(StatusCodes.Status500InternalServerError, e);
+                return StatusCode(500, ErrorViewModel.UNHANDLED_EXCEPTION);
             }
         }
 
@@ -89,16 +83,11 @@ namespace BaseProject.API.Areas.Example.Controllers
             }
             catch (ItemNotFoundException)
             {
-                return BadRequest(new ErrorViewModel()
-                {
-                    Message = $"ExampleEntity with ID {dto.Id} not found",
-                    ErrorKey = "entity_not_found"
-                });
+                return BadRequest(ErrorViewModel.NOT_FOUND);
             }
-            catch (Exception e)
+            catch (Exception)
             {
-                // Exception we do not expect. Send stacktrace to user.
-                return StatusCode(StatusCodes.Status500InternalServerError, e);
+                return StatusCode(500, ErrorViewModel.UNHANDLED_EXCEPTION);
             }
         }
     }
