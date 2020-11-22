@@ -1,4 +1,4 @@
-﻿// <copyright file="AppConfiguration.cs" company="PlaceholderCompany">
+﻿// <copyright file="FileConfiguration.cs" company="PlaceholderCompany">
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
 
@@ -6,12 +6,12 @@ namespace BaseProject.Common.Infrastructure.Configuration
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
     using System.Text;
+    using System.Threading.Tasks;
 
-    public class AppConfiguration
+    public class FileConfiguration
     {
-        public DBConfiguration DB { get; set; }
-
-        public FileConfiguration File { get; set; }
+        public string UploadedFilesDirectory { get; set; }
     }
 }

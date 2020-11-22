@@ -7,6 +7,7 @@ namespace BaseProject.API.Areas.Example.Controllers
     using System;
     using System.Collections.Generic;
     using System.ComponentModel.DataAnnotations;
+    using System.IO;
     using System.Linq;
     using System.Threading.Tasks;
     using BaseProject.API.Areas.Example.ViewModels;
@@ -14,6 +15,7 @@ namespace BaseProject.API.Areas.Example.Controllers
     using BaseProject.Common.Areas.Example.Models;
     using BaseProject.Common.Areas.Example.Services;
     using BaseProject.Common.Infrastructure.Exceptions;
+    using BaseProject.Common.Infrastructure.Files;
     using Microsoft.AspNetCore.Authentication.JwtBearer;
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Http;
@@ -25,10 +27,12 @@ namespace BaseProject.API.Areas.Example.Controllers
     public class ExampleController : ControllerBase
     {
         private readonly ExampleService _exampleService;
+        private readonly FileService _fileService;
 
-        public ExampleController(ExampleService exampleService)
+        public ExampleController(ExampleService exampleService, FileService fileService)
         {
             _exampleService = exampleService;
+            _fileService = fileService;
         }
 
         [HttpGet("{page:int?}")]
@@ -88,6 +92,70 @@ namespace BaseProject.API.Areas.Example.Controllers
             catch (Exception)
             {
                 return StatusCode(500, ErrorViewModel.UNHANDLED_EXCEPTION);
+            }
+        }
+
+        [HttpPost]
+        [Authorize]
+        public async Task<IActionResult> Upload([FromForm] UploadRequestModel model)
+        {
+            try
+            {
+                // Should probably to nest this upload code in a service, like _postService.Upload(...);
+                // Right now it's only for the example
+                var stream = new MemoryStream();
+                await model.File.CopyToAsync(stream);
+
+                var fileName = Guid.NewGuid().ToString() + Path.GetExtension(model.File.FileName);
+
+                await _fileService.WriteAsync(new ()
+                {
+                    FileName = fileName,
+                    FileStream = stream
+                });
+
+                return Ok(new UploadResponseModel()
+                {
+                    FileName = fileName
+                });
+            }
+            catch (FileUploadException)
+            {
+                return BadRequest(new ErrorViewModel()
+                {
+                    ErrorKey = "upload_failed"
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.ToString());
+            }
+        }
+
+        [HttpGet("{fileName}")]
+        [Authorize]
+        public IActionResult Image(string fileName)
+        {
+            try
+            {
+                var fileReadResult = _fileService.Read(fileName);
+
+                return File(fileReadResult.FileStream, fileReadResult.MimeType);
+            }
+            catch (FileReadException)
+            {
+                return BadRequest(new ErrorViewModel()
+                {
+                    ErrorKey = "file_read_error"
+                });
+            }
+            catch (FileNotFoundException)
+            {
+                return BadRequest(ErrorViewModel.NOT_FOUND);
+            }
+            catch (Exception)
+            {
+                return BadRequest(ErrorViewModel.UNHANDLED_EXCEPTION);
             }
         }
     }

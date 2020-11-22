@@ -11,6 +11,7 @@ namespace BaseProject.Common.Infrastructure.DependencyInjection
     using System.Threading.Tasks;
     using BaseProject.Common.Areas.Example.Services;
     using BaseProject.Common.DB;
+    using BaseProject.Common.Infrastructure.Files;
     using Microsoft.Extensions.DependencyInjection;
 
     public static class CommonServicesRegistration
@@ -25,6 +26,7 @@ namespace BaseProject.Common.Infrastructure.DependencyInjection
 
             // Services
             services.AddScoped<ExampleService>();
+            services.AddScoped<FileService>();
         }
     }
 }
