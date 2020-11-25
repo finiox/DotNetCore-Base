@@ -15,28 +15,12 @@ namespace BaseProject.Common.DB
 
     public class BaseProjectContext : DbContext
     {
-        private readonly DBConfiguration _dbConfig;
-
-        public BaseProjectContext()
+        public BaseProjectContext(DbContextOptions options)
+            : base(options)
         {
-            _dbConfig = new DBConfiguration()
-            {
-                ConnectionString = "Data Source=localhost;Initial Catalog=Database; Integrated Security=true; Connect Timeout=120"
-            };
-        }
-
-        public BaseProjectContext(AppConfiguration appConfig)
-        {
-            _dbConfig = appConfig.DB;
         }
 
         public DbSet<ExampleEntity> ExampleEntities { get; set; }
-
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        {
-            base.OnConfiguring(optionsBuilder);
-            optionsBuilder.UseSqlServer(_dbConfig.ConnectionString);
-        }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

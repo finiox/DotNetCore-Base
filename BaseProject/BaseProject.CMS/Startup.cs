@@ -61,7 +61,8 @@ namespace BaseProject.CMS
             services.AddControllersWithViews();
             services.AddRazorPages();
 
-            services.AddCommonProject();
+            services.AddCommonProject(options =>
+                options.UseSqlServer(_config.DB.ConnectionString));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

@@ -89,7 +89,8 @@ namespace BaseProject
                     identityOptions.User.RequireUniqueEmail = true;
                 });
 
-            services.AddCommonProject();
+            services.AddCommonProject(options =>
+                options.UseSqlServer(_config.DB.ConnectionString));
 
             // Authentication
             services

@@ -12,14 +12,15 @@ namespace BaseProject.Common.Infrastructure.DependencyInjection
     using BaseProject.Common.Areas.Example.Services;
     using BaseProject.Common.DB;
     using BaseProject.Common.Infrastructure.Files;
+    using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.DependencyInjection;
 
     public static class CommonServicesRegistration
     {
-        public static void AddCommonProject(this IServiceCollection services)
+        public static void AddCommonProject(this IServiceCollection services, Action<DbContextOptionsBuilder> options = null)
         {
             // DB Context
-            services.AddDbContext<BaseProjectContext>();
+            services.AddDbContext<BaseProjectContext>(options);
 
             // Repositories
             services.AddScoped<ExampleRepository>();
